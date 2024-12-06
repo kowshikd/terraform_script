@@ -1,11 +1,11 @@
 # Instance profile
 resource "aws_iam_instance_profile" "batch_environment_instance_profile" {
-  name = "${replace(var.compute_environment_name, "-", "_")}_instance_profile"
+  name = "${replace(var.compute_environment_name, "-", "_")}_instance_profile_${var.tag_environment}_test_2024"
   role = aws_iam_role.batch_environment_instance_role.name
 }
 
 resource "aws_iam_role" "batch_environment_instance_role" {
-  name = "${replace(var.compute_environment_name, "-", "_")}_instance_role"
+  name = "${replace(var.compute_environment_name, "-", "_")}_instance_role_${var.tag_environment}_test_2024"
 
   assume_role_policy = data.aws_iam_policy_document.batch_environment_instance_assume_role_policy.json
 }
@@ -29,7 +29,7 @@ resource "aws_iam_role_policy_attachment" "batch_environment_instance_role_attac
 
 # Service role
 resource "aws_iam_role" "aws_batch_service_role" {
-  name = "${replace(var.compute_environment_name, "-", "_")}_aws_batch_service_role"
+  name = "${replace(var.compute_environment_name, "-", "_")}_aws_batch_service_role_${var.tag_environment}_test_2024"
 
   assume_role_policy = data.aws_iam_policy_document.aws_batch_service_assume_role_policy.json
 }
@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "aws_batch_service_role" {
 }
 
 resource "aws_iam_role_policy" "iam_policy" {
-  name_prefix = "${var.compute_environment_name}_S3_SSM"
+  name_prefix = "${var.compute_environment_name}_S3_SSM_${var.tag_environment}_test_2024"
   role        = aws_iam_role.batch_environment_instance_role.name
   policy      = file("${path.module}/iam_role_policy.tmpl")
 }
@@ -62,7 +62,7 @@ resource "aws_iam_role_policy" "iam_policy" {
 
 resource "aws_iam_role_policy" "new_relic_license" {
 
-  name_prefix = "${var.compute_environment_name}_new_relic_license"
+  name_prefix = "${var.compute_environment_name}_new_relic_license_${var.tag_environment}_test_2024"
   role        = aws_iam_role.batch_environment_instance_role.name
 
   policy = <<EOF
@@ -89,7 +89,7 @@ EOF
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "dp-ip-async-batch_exec_role"
+  name               = "dp-ip-async-batch_exec_role_${var.tag_environment}_test_2024"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
@@ -112,7 +112,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 resource "aws_iam_role_policy" "job_definition_role_policy_1" {
 
-  name_prefix = "${var.compute_environment_name}_job_definition1"
+  name_prefix = "${var.compute_environment_name}_job_definition_${var.tag_environment}_test_2024_1"
   role        = aws_iam_role.ecs_task_execution_role.name
 
   policy = <<EOF
@@ -131,7 +131,7 @@ EOF
 
 resource "aws_iam_role_policy" "job_definition_role_policy_2" {
 
-  name_prefix = "${var.compute_environment_name}_job_definition2"
+  name_prefix = "${var.compute_environment_name}_job_definition_${var.tag_environment}_test_2024_2"	
   role        = aws_iam_role.ecs_task_execution_role.name
 
   policy = <<EOF
@@ -168,7 +168,7 @@ EOF
 
 resource "aws_iam_role_policy" "job_definition_role_policy_3" {
 
-  name_prefix = "${var.compute_environment_name}_job_definition3"
+  name_prefix = "${var.compute_environment_name}_job_definition_${var.tag_environment}_test_2024_3"
   role        = aws_iam_role.ecs_task_execution_role.name
 
   policy = <<EOF
@@ -194,7 +194,7 @@ EOF
 
 resource "aws_iam_role_policy" "job_definition_role_policy_4" {
 
-  name_prefix = "${var.compute_environment_name}_job_definition4"
+  name_prefix = "${var.compute_environment_name}_job_definition_${var.tag_environment}_test_2024_4"
   role        = aws_iam_role.ecs_task_execution_role.name
 
   policy = <<EOF

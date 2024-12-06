@@ -5,7 +5,7 @@ data "aws_ami" "base_ami" {
 }
 
 resource "aws_batch_compute_environment" "batch_aft_environment" {
-  compute_environment_name = "${var.aft_compute_environment_name}_${substr(replace("${timestamp()}", "/[-| |T|Z|:]/", ""), 0, 14)}"
+  compute_environment_name = "${var.aft_compute_environment_name}_${var.tag_environment}_test_2024"
 
   compute_resources {
     instance_role = aws_iam_instance_profile.batch_environment_instance_profile.arn
@@ -52,7 +52,7 @@ resource "aws_batch_compute_environment" "batch_aft_environment" {
 }
 
 resource "aws_batch_job_queue" "default_aft_queue" {
-  name                 = "${var.aft_compute_environment_name}-default-queue"
+  name                 = "${var.aft_compute_environment_name}-default-queue_${var.tag_environment}_test_2024"
   state                = "ENABLED"
   priority             = var.default_queue_priority
   compute_environments = [aws_batch_compute_environment.batch_aft_environment.arn]
@@ -70,13 +70,13 @@ resource "aws_batch_job_queue" "default_aft_queue" {
 
 
 resource "aws_batch_job_definition" "default_aft_job_definition" {
-  name = "${var.aft_compute_environment_name}-default-job-definition"
+  name = "${var.aft_compute_environment_name}-default-job-definition_${var.tag_environment}_test_2024"
   type = "container"
 
   container_properties = <<CONTAINER_PROPERTIES
 {
     "command": ["true"],
-    "image": ${var.container_image_aft},
+    "image": "${var.container_image_aft}",
     "memory": 16384,
     "vcpus": 8,
     "executionRoleArn": "${aws_iam_role.ecs_task_execution_role.arn}",
@@ -85,7 +85,8 @@ resource "aws_batch_job_definition" "default_aft_job_definition" {
     "volumes": [
       {
         "host": {
-          "sourcePath": "/shared"
+          "filesystemid": "${var.filesystemid}",
+          "rootDirectory": "/aft"
         },
         "name": "shared"
       }
@@ -96,11 +97,13 @@ resource "aws_batch_job_definition" "default_aft_job_definition" {
     "mountPoints": [
         {
           "sourceVolume": "shared",
-          "containerPath": "/shared",
+          "containerPath": "/opt/shared",
           "readOnly": false
         }
-    ]
-
+    ],
+    "timeout": {
+        "attemptDurationSeconds": 3600
+    }
 }
 CONTAINER_PROPERTIES
 

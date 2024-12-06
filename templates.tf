@@ -1,5 +1,5 @@
 resource "aws_launch_template" "batch_environment_launch_template" {
-  name_prefix = "batch_environment-${var.tag_environment}"
+  name_prefix = "batch_environment-${var.tag_environment}_test"
   user_data   = filebase64("user_data.sh")
 
   block_device_mappings {

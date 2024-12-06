@@ -21,3 +21,7 @@ container_image_matcher          = "023759106857.dkr.ecr.us-east-2.amazonaws.com
 container_image_output_transformer = "023759106857.dkr.ecr.us-east-2.amazonaws.com/dp-ip-async-transformers:latest"
 container_image_input_transformer = "023759106857.dkr.ecr.us-east-2.amazonaws.com/dp-ip-async-transformers:latest"
 sg_groups                         = ["10.0.0.0/8", "172.29.0.0/16"]
+filesystemid                     = "fs-02d66d746d3a60a2c"
+backend_bucket                   = "elsevier-tio-data-platform-023759106857"
+backend_key                      = "tfstate/prod/aws-rt-dataplatform-nonprod-dp-ip-async-api-infra.tfstate"
+backend_region                   = "us-east-1"

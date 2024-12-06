@@ -1,5 +1,5 @@
 resource "aws_batch_compute_environment" "batch_output_transformer_environment" {
-  compute_environment_name = "${var.output_transformer_environment_name}_${substr(replace("${timestamp()}", "/[-| |T|Z|:]/", ""), 0, 14)}"
+  compute_environment_name = "${var.output_transformer_environment_name}_${var.tag_environment}_test_2024"
 
   compute_resources {
     instance_role = aws_iam_instance_profile.batch_environment_instance_profile.arn
@@ -46,7 +46,7 @@ resource "aws_batch_compute_environment" "batch_output_transformer_environment" 
 }
 
 resource "aws_batch_job_queue" "default_output_transformer_queue" {
-  name                 = "${var.output_transformer_environment_name}-default-queue"
+  name                 = "${var.output_transformer_environment_name}-default-queue_${var.tag_environment}_test_2024"
   state                = "ENABLED"
   priority             = var.default_queue_priority
   compute_environments = [aws_batch_compute_environment.batch_output_transformer_environment.arn]
@@ -65,22 +65,23 @@ resource "aws_batch_job_queue" "default_output_transformer_queue" {
 
 
 resource "aws_batch_job_definition" "default_output_transformer_job_definition" {
-  name = "${var.output_transformer_environment_name}-default-job-definition"
+  name = "${var.output_transformer_environment_name}-default-job-definition_${var.tag_environment}_test_2024"
   type = "container"
 
   container_properties = <<CONTAINER_PROPERTIES
 {
     "command": ["true"],
     "image": "${var.container_image_output_transformer}",
-    "memory": 12288,
-    "vcpus": 4,
+    "memory": 32768,
+    "vcpus": 8,
     "executionRoleArn": "${aws_iam_role.ecs_task_execution_role.arn}",
 	"jobRoleArn": "${aws_iam_role.ecs_task_execution_role.arn}",
 
     "volumes": [
       {
         "host": {
-          "sourcePath": "/shared"
+          "filesystemid": "${var.filesystemid}",
+          "rootDirectory": "/"
         },
         "name": "shared"
       }
@@ -90,8 +91,8 @@ resource "aws_batch_job_definition" "default_output_transformer_job_definition" 
     ],
     "mountPoints": [
         {
-          "sourceVolume": "shared",
-          "containerPath": "/shared",
+          "sourceVolume": "efs",
+          "containerPath": "/efs",
           "readOnly": false
         }
     ]
