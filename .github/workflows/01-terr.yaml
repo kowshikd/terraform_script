@@ -1,0 +1,52 @@
+name: 01-terraform-apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      destroy_needed:
+        description: 'Specify if Terraform destroy is needed'
+        required: true
+        default: 'false'
+      environment:
+        description: 'Choose the environment to run (dev or prod)'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: 'dev'
+      
+jobs:
+  print_repository_details:
+    name: "Repository details"
+    runs-on:
+      group: elsevier-standard-runners
+    steps:
+      - name: Repository details
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Trigger event: ${{ github.event_name }}"
+    
+  provision_terraform:
+    name: "Provision Terraform"
+    needs: print_repository_details
+    uses: elsevier-research/dp-core-github-actions/.github/workflows/provision-terraform.yml@v1
+    with:
+      environments: ${{ github.event.inputs.environment }}
+      component: "dp-ip-async-api-infra"
+      terraform_location: "infra/batch"
+      terraform_version: "1.8.3"
+
+  destroy_terraform:
+    name: "Destroy Terraform"
+    needs: provision_terraform
+    working_directory: "infra/batch"
+    runs-on: 
+      group: elsevier-standard-runners
+    if: ${{ github.event.inputs.destroy_needed == 'true' }}
+    steps:
+      - name: Terraform Destroy
+        run: |
+          cd path/to/terraform/location
+          terraform destroy -auto-approve
